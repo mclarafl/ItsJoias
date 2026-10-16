@@ -1,0 +1,20 @@
+# Quebra de linha igual para todo mundo (Windows, Mac e Linux).
+# Sem isso, o Git mostra arquivos inteiros como "alterados" só por causa do fim de linha.
+* text=auto eol=lf
+
+# Scripts do Windows precisam de CRLF
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Arquivos binários: o Git não deve tentar comparar nem converter
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.pdf   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.jar   binary
