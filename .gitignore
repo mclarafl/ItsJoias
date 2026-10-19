@@ -1,0 +1,82 @@
+# =====================================================================
+# ITS Joias — arquivos que NUNCA sobem para o repositório
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# Segredos e configuração local
+# Senhas, chaves e endereços de banco ficam só na máquina de cada uma.
+# Um modelo como .env.example pode subir, só com os nomes das variáveis.
+# ---------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+**/application-local.properties
+**/application-local.yml
+**/application-local.yaml
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# ---------------------------------------------------------------------
+# Dados do banco
+# O repositório guarda só os scripts que CRIAM o banco, nunca os dados.
+# ---------------------------------------------------------------------
+*.backup
+*.dump
+*.bak
+database/backups/
+database/dumps/
+
+# ---------------------------------------------------------------------
+# Back-end — Java / Spring Boot (Maven ou Gradle)
+# ---------------------------------------------------------------------
+backend/target/
+backend/build/
+backend/.gradle/
+backend/out/
+*.class
+hs_err_pid*
+replay_pid*
+
+# ---------------------------------------------------------------------
+# Front-end — React / Node
+# ---------------------------------------------------------------------
+node_modules/
+frontend/dist/
+frontend/build/
+frontend/coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------------------------------------------------------------------
+# Logs e temporários
+# ---------------------------------------------------------------------
+*.log
+logs/
+*.tmp
+*.swp
+
+# ---------------------------------------------------------------------
+# Editores e IDEs
+# ---------------------------------------------------------------------
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+.settings/
+.project
+.classpath
+.factorypath
+.sts4-cache/
+
+# ---------------------------------------------------------------------
+# Sistema operacional
+# ---------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
