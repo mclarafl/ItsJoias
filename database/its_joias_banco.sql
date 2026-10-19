@@ -1,3 +1,56 @@
+-- =====================================================================
+-- ITS Joias — Banco de dados completo
+-- PostgreSQL 18, criado direto pelo pgAdmin.
+--
+-- COMO RODAR
+--   1. No pgAdmin, crie o banco its_joias (vazio).
+--   2. Conecte nele, abra este arquivo na Query Tool e execute o ARQUIVO
+--      INTEIRO (F5), sem selecionar trecho. A ordem importa: itens_venda,
+--      por exemplo, depende de vendas e de maleta_itens já existirem.
+--   3. Clique com o botão direito em Tables > Refresh: devem aparecer
+--      17 tabelas e, em Views, 10 views.
+--
+-- Se você já criou tabelas à mão neste banco, apague tudo antes com o
+-- bloco LIMPEZA abaixo (tire os "--" das duas linhas, rode, e coloque de
+-- volta). Ele apaga TODOS os dados do banco its_joias.
+--
+--   DROP SCHEMA public CASCADE;
+--   CREATE SCHEMA public;
+--
+-- Partes deste arquivo:
+--   Parte 1: tabelas, constraints e índices
+--   Parte 2: views (tudo que é calculado: saldo, atraso, estoque, dashboards)
+--   Parte 3: triggers de proteção (o fluxo fica no Spring Boot; o banco
+--            recusa o que nunca pode acontecer)
+--   Parte 4: dados iniciais (categorias e palavras-chave)
+--
+-- No Spring Boot, use spring.jpa.hibernate.ddl-auto=validate: o Hibernate
+-- só confere se as entidades batem com este banco, sem criar nem alterar nada.
+--
+-- Já inclui os ajustes do fluxo de venda:
+--   * vendas.acrescimo (os +10%), e valor_total = produtos + acréscimo - desconto
+--   * itens_venda.maleta_item_id obrigatório (o back escolhe a maleta por FIFO)
+--
+-- E as correções da revisão de 2026-10-14:
+--   * clientes.cpf em VARCHAR(11) (o Hibernate recusa CHAR com validate)
+--   * movimentação ligada a maleta precisa dizer qual maleta
+--     (ck_mov_maleta_obrigatoria)
+--   * "só cancela sem pagamento válido" conferido no COMMIT, e não no UPDATE:
+--     o cancelamento passa em qualquer ordem de UPDATE do Hibernate
+--   * pagamento trava a venda antes da parcela: pagamento e cancelamento
+--     ao mesmo tempo não deixam venda cancelada com dinheiro recebido
+--   * saldo por maleta nunca negativo e devolução nunca em dobro
+--     (trg_mov_validar)
+--
+-- E o código por peça (2026-10-15):
+--   * tabela pecas: cada unidade física tem etiqueta própria, C0001-01, C0001-02...
+--   * itens_venda e movimentacoes_estoque passam a apontar a PEÇA (uma linha por peça)
+--   * a situação da peça (disponível, vendida, perdida, devolvida) vem da última
+--     movimentação dela (vw_pecas); a etiqueta é achada por vw_busca_peca
+-- =====================================================================
+
+-- "Hoje" precisa ser o dia de São Paulo, senão CURRENT_DATE erra o atraso
+-- entre 21h e 0h (UTC). Vale para as próximas conexões; o SET vale para esta.
 DO $$
 BEGIN
     EXECUTE format('ALTER DATABASE %I SET timezone TO %L', current_database(), 'America/Sao_Paulo');
