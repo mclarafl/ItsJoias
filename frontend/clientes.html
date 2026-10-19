@@ -9,7 +9,8 @@
 
 <body>
     <header>
-        <h1> Organização Its Joias </h1>
+        <h1>Organização Its Joias</h1>
+
         <nav>
             <ul>
                 <li><a href="index.html">Visualização geral</a></li>
@@ -23,7 +24,8 @@
     <main>
         <h2>Clientes</h2>
         <p>Aqui mostra todos os clientes que você vendeu peças.</p>
-                <button type="button" onclick="mostrarFormulario()">
+
+        <button type="button" onclick="mostrarFormulario()">
             + Novo cliente
         </button>
 
@@ -33,7 +35,6 @@
             <form id="form-cliente">
                 <label for="nome">Nome:</label>
                 <input type="text" id="nome" name="nome" required>
-
 
                 <label for="telefone">Telefone:</label>
                 <input
@@ -47,10 +48,10 @@
 
                 <label for="email">E-mail:</label>
                 <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="exemplo@dominio.com"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="exemplo@dominio.com"
                 >
 
                 <label for="cpf">CPF:</label>
@@ -69,11 +70,13 @@
                 <textarea id="observacoes" name="observacoes"></textarea>
 
                 <button type="submit">Salvar cliente</button>
+
                 <button type="button" onclick="esconderFormulario()">
                     Cancelar
                 </button>
             </form>
         </div>
+
         <table>
             <thead>
                 <tr>
@@ -110,98 +113,108 @@
     </footer>
 
     <script>
-      document.getElementById("form-cliente").addEventListener("submit", async function(event) {
-    event.preventDefault();
+        const formulario = document.getElementById("form-cliente");
+        const campoTelefone = document.getElementById("telefone");
+        const campoCPF = document.getElementById("cpf");
 
-    const cliente = {
-        nome: document.getElementById("nome").value.trim(),
-        telefone: document.getElementById("telefone").value.trim(),
-        email: document.getElementById("email").value.trim() || null,
-        cpf: document.getElementById("cpf").value.trim() || null,
-        endereco: document.getElementById("endereco").value.trim() || null,
-        observacoes: document.getElementById("observacoes").value.trim() || null,
-        ativo: true
-    };
-
-    try {
-        const resposta = await fetch("http://localhost:8080/api/clientes", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(cliente)
-        });
-
-        if (!resposta.ok) {
-            throw new Error("Erro ao cadastrar cliente: " + resposta.status);
+        function mostrarFormulario() {
+            document.getElementById("formulario-cliente").hidden = false;
         }
 
-        alert("Cliente cadastrado com sucesso!");
-        document.getElementById("form-cliente").reset();
-        esconderFormulario();
+        function esconderFormulario() {
+            document.getElementById("formulario-cliente").hidden = true;
+        }
 
-    } catch (erro) {
-        console.error(erro);
-        alert("Não foi possível cadastrar. Confira se o backend está funcionando.");
-    }
-});
-const campoTelefone = document.getElementById("telefone");
+        // Máscara de telefone
+        campoTelefone.addEventListener("input", function () {
+            let numeros = this.value.replace(/\D/g, "");
+            numeros = numeros.substring(0, 11);
 
-campoTelefone.addEventListener("input", function () {
-    let numeros = this.value.replace(/\D/g, "");
-    numeros = numeros.substring(0, 11);
+            if (numeros.length > 7) {
+                this.value = numeros.replace(
+                    /^(\d{2})(\d{5})(\d{0,4}).*/,
+                    "($1) $2-$3"
+                );
+            } else if (numeros.length > 2) {
+                this.value = numeros.replace(
+                    /^(\d{2})(\d{0,5})/,
+                    "($1) $2"
+                );
+            } else if (numeros.length > 0) {
+                this.value = "(" + numeros;
+            } else {
+                this.value = "";
+            }
+        });
 
-    if (numeros.length > 7) {
-        this.value = numeros.replace(
-            /^(\d{2})(\d{5})(\d{0,4}).*/,
-            "($1) $2-$3"
-        );
-    } else if (numeros.length > 2) {
-        this.value = numeros.replace(
-            /^(\d{2})(\d{0,5})/,
-            "($1) $2"
-        );
-    } else if (numeros.length > 0) {
-        this.value = "(" + numeros;
-    } else {
-        this.value = "";
-    }
-});
+        // Máscara de CPF
+        campoCPF.addEventListener("input", function () {
+            let numeros = this.value.replace(/\D/g, "");
+            numeros = numeros.substring(0, 11);
 
-function mostrarFormulario() {
-    document.getElementById("formulario-cliente").hidden = false;
-}
+            if (numeros.length > 9) {
+                numeros = numeros.replace(
+                    /^(\d{3})(\d{3})(\d{3})(\d{1,2}).*/,
+                    "$1.$2.$3-$4"
+                );
+            } else if (numeros.length > 6) {
+                numeros = numeros.replace(
+                    /^(\d{3})(\d{3})(\d{1,3}).*/,
+                    "$1.$2.$3"
+                );
+            } else if (numeros.length > 3) {
+                numeros = numeros.replace(
+                    /^(\d{3})(\d{1,3}).*/,
+                    "$1.$2"
+                );
+            }
 
-function esconderFormulario() {
-    document.getElementById("formulario-cliente").hidden = true;
-}
+            this.value = numeros;
+        });
 
-const campoCPF = document.getElementById("cpf");
+        // Envio do cadastro para o backend
+        formulario.addEventListener("submit", async function (event) {
+            event.preventDefault();
 
-campoCPF.addEventListener("input", function () {
-    let numeros = this.value.replace(/\D/g, "");
+            const cliente = {
+                nome: document.getElementById("nome").value.trim(),
+                telefone: campoTelefone.value.trim(),
+                email: document.getElementById("email").value.trim() || null,
+                cpf: campoCPF.value.trim() || null,
+                endereco: document.getElementById("endereco").value.trim() || null,
+                observacoes: document.getElementById("observacoes").value.trim() || null,
+                ativo: true
+            };
 
-    // Limita a 11 dígitos
-    numeros = numeros.substring(0, 11);
+            try {
+                const resposta = await fetch("http://localhost:8080/api/clientes", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(cliente)
+                });
 
-    numeros = numeros.replace(
-        /^(\d{3})(\d)/,
-        "$1.$2"
-    );
+                if (!resposta.ok) {
+                    const mensagem = await resposta.text();
+                    throw new Error(
+                        "Erro ao cadastrar cliente: " +
+                        resposta.status + " " + mensagem
+                    );
+                }
 
-    numeros = numeros.replace(
-        /^(\d{3})\.(\d{3})(\d)/,
-        "$1.$2.$3"
-    );
+                alert("Cliente cadastrado com sucesso!");
+                formulario.reset();
+                esconderFormulario();
 
-    numeros = numeros.replace(
-        /^(\d{3})\.(\d{3})\.(\d{3})(\d{1,2})$/,
-        "$1.$2.$3-$4"
-    );
-
-    this.value = numeros;
-});
-
-</script>
+            } catch (erro) {
+                console.error(erro);
+                alert(
+                    "Não foi possível cadastrar o cliente. " +
+                    "Confira se o backend está funcionando."
+                );
+            }
+        });
+    </script>
 </body>
 </html>
